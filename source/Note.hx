@@ -4,11 +4,12 @@ import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
+
+using StringTools;
+
 #if polymod
 import polymod.format.ParseRules.TargetSignatureElement;
 #end
-
-using StringTools;
 
 class Note extends FlxSprite
 {
@@ -19,6 +20,7 @@ class Note extends FlxSprite
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
+	public var isMine:Bool = false;
 	public var prevNote:Note;
 
 	public var sustainLength:Float = 0;
@@ -27,10 +29,14 @@ class Note extends FlxSprite
 	public var noteScore:Float = 1;
 
 	public static var swagWidth:Float = 160 * 0.7;
-	public static var PURP_NOTE:Int = 0;
-	public static var GREEN_NOTE:Int = 2;
-	public static var BLUE_NOTE:Int = 1;
-	public static var RED_NOTE:Int = 3;
+	public static var PURP_NOTE:Int = 0; // left
+	public static var GREEN_NOTE:Int = 2; // up
+	public static var BLUE_NOTE:Int = 1; // down
+	public static var RED_NOTE:Int = 3; // right
+	public static var LEFT_MINE:Int = 8;
+	public static var UP_MINE:Int = 10;
+	public static var DOWN_MINE:Int = 9;
+	public static var RIGHT_MINE:Int = 11;
 
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false)
 	{
@@ -48,6 +54,15 @@ class Note extends FlxSprite
 		this.strumTime = strumTime;
 
 		this.noteData = noteData;
+
+		// trace('the note data for this note is ' + this.noteData);
+
+		if (this.noteData >= 8)
+		{
+			trace('oh my god a mine spawned');
+			this.isMine = true;
+			this.canBeHit = true;
+		}
 
 		var daStage:String = PlayState.curStage;
 
@@ -97,6 +112,11 @@ class Note extends FlxSprite
 				animation.addByPrefix('redhold', 'red hold piece');
 				animation.addByPrefix('bluehold', 'blue hold piece');
 
+				animation.addByPrefix('tempMineLeft', 'arrowLEFT0');
+				animation.addByPrefix('tempMineDown', 'arrowDOWN0');
+				animation.addByPrefix('tempMineUp', 'arrowUP0');
+				animation.addByPrefix('tempMineRight', 'arrowRIGHT0');
+
 				setGraphicSize(Std.int(width * 0.7));
 				updateHitbox();
 				antialiasing = true;
@@ -116,6 +136,18 @@ class Note extends FlxSprite
 			case 3:
 				x += swagWidth * 3;
 				animation.play('redScroll');
+			case 8:
+				x += swagWidth * 0;
+				animation.play('tempMineLeft');
+			case 9:
+				x += swagWidth * 1;
+				animation.play('tempMineDown');
+			case 10:
+				x += swagWidth * 2;
+				animation.play('tempMineUp');
+			case 11:
+				x += swagWidth * 3;
+				animation.play('tempMineRight');
 		}
 
 		// trace(prevNote);

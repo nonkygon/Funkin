@@ -96,10 +96,11 @@ class TitleState extends MusicBeatState
 
 		#if desktop
 		DiscordClient.initialize();
-		
-		Application.current.onExit.add (function (exitCode) {
+
+		Application.current.onExit.add(function(exitCode)
+		{
 			DiscordClient.shutdown();
-		 });
+		});
 		#end
 	}
 
@@ -376,9 +377,9 @@ class TitleState extends MusicBeatState
 			// credTextShit.text = 'In association \nwith';
 			// credTextShit.screenCenter();
 			case 5:
-				createCoolText(['In association', 'with']);
+				createCoolText(['big boner']);
 			case 7:
-				addMoreText('newgrounds');
+				addMoreText('down the lane');
 				ngSpr.visible = true;
 			// credTextShit.text += '\nNewgrounds';
 			case 8:
@@ -391,6 +392,8 @@ class TitleState extends MusicBeatState
 			case 9:
 				createCoolText([curWacky[0]]);
 			// credTextShit.visible = true;
+			case 10:
+				addMoreText('he will never be ballin');
 			case 11:
 				addMoreText(curWacky[1]);
 			// credTextShit.text += '\nlmao';
@@ -421,7 +424,7 @@ class TitleState extends MusicBeatState
 		{
 			remove(ngSpr);
 
-			FlxG.camera.flash(FlxColor.WHITE, 4);
+			FlxG.camera.flash(FlxColor.RED, 4);
 			remove(credGroup);
 			skippedIntro = true;
 		}
