@@ -67,6 +67,8 @@ class PlayState extends MusicBeatState
 	private var strumLine:FlxSprite;
 	private var curSection:Int = 0;
 
+	private var speedMod:Float = 1;
+
 	private var camFollow:FlxObject;
 
 	private static var prevCamFollow:FlxObject;
@@ -1069,11 +1071,12 @@ class PlayState extends MusicBeatState
 			for (songNotes in section.sectionNotes)
 			{
 				var daStrumTime:Float = songNotes[0];
-				var daNoteData:Int = Std.int(songNotes[1] /*% 4*/);
+				var daNoteData:Int = Std.int(songNotes[1] % 4);
+				var daMineCheck:Bool = (Std.int(songNotes[1]) >= 8);
 
 				var gottaHitNote:Bool = section.mustHitSection;
 
-				if (songNotes[1] > 11)
+				if (songNotes[1] > 11 && songNotes[1] > 3 && songNotes[1] < 8)
 				{
 					gottaHitNote = !section.mustHitSection;
 				}
@@ -1084,6 +1087,8 @@ class PlayState extends MusicBeatState
 				else
 					oldNote = null;
 
+				if (daMineCheck) // you could probably even have opponent mines with this lol
+					daNoteData += 8;
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.sustainLength = songNotes[2];
 				swagNote.scrollFactor.set(0, 0);
@@ -2236,13 +2241,16 @@ class PlayState extends MusicBeatState
 		{
 			goodNoteHit(note);
 		}
-		/*if (!keyP && note.isMine)
-			{
-				mineMiss(note);
-		}*/
 		else
 		{
-			badNoteCheck();
+			if (note.isMine)
+			{
+				mineMiss(note);
+			}
+			else
+			{
+				badNoteCheck();
+			}
 		}
 	}
 

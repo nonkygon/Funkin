@@ -61,7 +61,7 @@ class Note extends FlxSprite
 		{
 			trace('oh my god a mine spawned');
 			this.isMine = true;
-			this.canBeHit = true;
+			// this.canBeHit = true;
 		}
 
 		var daStage:String = PlayState.curStage;
