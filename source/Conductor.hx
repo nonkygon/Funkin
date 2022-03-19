@@ -6,7 +6,6 @@ import Song.SwagSong;
  * ...
  * @author
  */
-
 typedef BPMChangeEvent =
 {
 	var stepTime:Int;
@@ -28,27 +27,25 @@ class Conductor
 
 	public static var bpmChangeMap:Array<BPMChangeEvent> = [];
 
-	public function new()
-	{
-	}
+	public function new() {}
 
 	public static function mapBPMChanges(song:SwagSong)
 	{
 		bpmChangeMap = [];
 
-		var curBPM:Int = song.bpm;
+		var curBPM:Int = Std.int(song.bpm * song.speed); // less bad cast now
 		var totalSteps:Int = 0;
 		var totalPos:Float = 0;
 		for (i in 0...song.notes.length)
 		{
-			if(song.notes[i].changeBPM && song.notes[i].bpm != curBPM)
+			if (song.notes[i].changeBPM && song.notes[i].bpm != curBPM)
 			{
-				curBPM = song.notes[i].bpm;
+				curBPM = cast((song.notes[i].bpm * song.speed), Int);
 				var event:BPMChangeEvent = {
 					stepTime: totalSteps,
-					songTime: totalPos,
-					bpm: curBPM
-				};
+					songTime: (totalPos / song.speed),
+					bpm: cast((curBPM * song.speed), Int)
+				}
 				bpmChangeMap.push(event);
 			}
 

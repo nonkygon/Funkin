@@ -1,19 +1,22 @@
 package;
 
-#if desktop
-import Discord.DiscordClient;
-#end
+import Modifier.Speed.*;
 import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
+import flixel.math.FlxRect;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lime.utils.Assets;
 
 using StringTools;
+
+#if desktop
+import Discord.DiscordClient;
+#end
 
 class FreeplayState extends MusicBeatState
 {
@@ -179,6 +182,44 @@ class FreeplayState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		var speedText:FlxText = new FlxText(100, 100, 0, "", 8, false);
+
+		if (FlxG.keys.justPressed.RBRACKET)
+		{
+			Modifier.Speed.value += 0.1;
+			speedText = new FlxText(100, 100, 0, "speedMod: " + Modifier.Speed.value, 8, false);
+			speedText.setBorderStyle(OUTLINE_FAST, FlxColor.BLACK, 1, 1);
+			add(speedText);
+			trace("speedMod: " + Modifier.Speed.value);
+		}
+
+		if (FlxG.keys.justPressed.LBRACKET && Modifier.Speed.value > 0)
+		{
+			Modifier.Speed.value -= 0.1;
+			speedText = new FlxText(100, 100, 0, "speedMod: " + Modifier.Speed.value, 8, false);
+			speedText.setBorderStyle(OUTLINE_FAST, FlxColor.BLACK, 1, 1);
+			add(speedText);
+			trace("speedMod: " + Modifier.Speed.value);
+		}
+
+		if (FlxG.keys.justPressed.PERIOD)
+		{
+			Modifier.Practice.value += 1;
+			speedText = new FlxText(100, 100, 0, "Practice val: " + Modifier.Practice.value, 8, false);
+			speedText.setBorderStyle(OUTLINE_FAST, FlxColor.BLACK, 1, 1);
+			add(speedText);
+			trace("Practice val: " + Modifier.Practice.value);
+		}
+
+		if (FlxG.keys.justPressed.COMMA && Modifier.Practice.value > 0)
+		{
+			Modifier.Practice.value -= 1;
+			speedText = new FlxText(100, 100, 0, "Practice val: " + Modifier.Practice.value, 8, false);
+			speedText.setBorderStyle(OUTLINE_FAST, FlxColor.BLACK, 1, 1);
+			add(speedText);
+			trace("Practice val: " + Modifier.Practice.value);
+		}
 
 		if (FlxG.sound.music.volume < 0.7)
 		{

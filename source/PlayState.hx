@@ -1,8 +1,5 @@
 package;
 
-#if desktop
-import Discord.DiscordClient;
-#end
 import Section.SwagSection;
 import Song.SwagSong;
 import WiggleEffect.WiggleEffectType;
@@ -41,9 +38,15 @@ import lime.utils.Assets;
 import openfl.display.BlendMode;
 import openfl.display.StageQuality;
 import openfl.filters.ShaderFilter;
+import sys.thread.Thread;
 
 using StringTools;
 
+#if desktop
+import Discord.DiscordClient;
+#end
+
+// import SpeedModifier.Speed.*;
 class PlayState extends MusicBeatState
 {
 	public static var curStage:String = '';
@@ -65,9 +68,9 @@ class PlayState extends MusicBeatState
 	private var unspawnNotes:Array<Note> = [];
 
 	private var strumLine:FlxSprite;
-	private var curSection:Int = 0;
+	private var curSection:Int = 0; // try using this for practice mode?
 
-	private var speedMod:Float = 1;
+	private var speedMod:Float = 1; // has to be controlled from here until SpeedModifer is finished
 
 	private var camFollow:FlxObject;
 
@@ -1028,7 +1031,7 @@ class PlayState extends MusicBeatState
 
 		#if desktop
 		// Song duration in a float, useful for the time left feature
-		songLength = FlxG.sound.music.length;
+		songLength = FlxG.sound.music.length / Modifier.Speed.value;
 
 		// Updating Discord Rich Presence (with Time Left)
 		DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconRPC, true, songLength);
@@ -1042,7 +1045,7 @@ class PlayState extends MusicBeatState
 		// FlxG.log.add(ChartParser.parse());
 
 		var songData = SONG;
-		Conductor.changeBPM(songData.bpm);
+		Conductor.changeBPM(Std.int(songData.bpm * Modifier.Speed.value));
 
 		curSong = songData.song;
 
@@ -1066,61 +1069,73 @@ class PlayState extends MusicBeatState
 		var daBeats:Int = 0; // Not exactly representative of 'daBeats' lol, just how much it has looped
 		for (section in noteData)
 		{
-			var coolSection:Int = Std.int(section.lengthInSteps / 4);
-
-			for (songNotes in section.sectionNotes)
+			if (Modifier.Practice.value > section.lengthInSteps)
 			{
-				var daStrumTime:Float = songNotes[0];
-				var daNoteData:Int = Std.int(songNotes[1] % 4);
-				var daMineCheck:Bool = (Std.int(songNotes[1]) >= 8);
+				trace(Modifier.Practice.value + " is larger than length, " + section.lengthInSteps);
+				Modifier.Practice.value = 0;
+			}
+			if (Modifier.Practice.value > 0)
+			{
+				Modifier.Practice.value -= 1;
+			}
+			else if (Modifier.Practice.value == 0)
+			{
+				var coolSection:Int = Std.int(section.lengthInSteps / 4);
 
-				var gottaHitNote:Bool = section.mustHitSection;
-
-				if (songNotes[1] > 11 && songNotes[1] > 3 && songNotes[1] < 8)
+				for (songNotes in section.sectionNotes)
 				{
-					gottaHitNote = !section.mustHitSection;
-				}
+					var daStrumTime:Float = songNotes[0] / Modifier.Speed.value;
+					var daNoteData:Int = Std.int(songNotes[1] % 4);
+					var daMineCheck:Bool = (Std.int(songNotes[1]) >= 8);
 
-				var oldNote:Note;
-				if (unspawnNotes.length > 0)
-					oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
-				else
-					oldNote = null;
+					var gottaHitNote:Bool = section.mustHitSection;
 
-				if (daMineCheck) // you could probably even have opponent mines with this lol
-					daNoteData += 8;
-				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
-				swagNote.sustainLength = songNotes[2];
-				swagNote.scrollFactor.set(0, 0);
-
-				var susLength:Float = swagNote.sustainLength;
-
-				susLength = susLength / Conductor.stepCrochet;
-				unspawnNotes.push(swagNote);
-
-				for (susNote in 0...Math.floor(susLength))
-				{
-					oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
-
-					var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true);
-					sustainNote.scrollFactor.set();
-					unspawnNotes.push(sustainNote);
-
-					sustainNote.mustPress = gottaHitNote;
-
-					if (sustainNote.mustPress)
+					if (songNotes[1] > 11 && songNotes[1] > 3 && songNotes[1] < 8)
 					{
-						sustainNote.x += FlxG.width / 2; // general offset
+						gottaHitNote = !section.mustHitSection;
 					}
-				}
 
-				swagNote.mustPress = gottaHitNote;
+					var oldNote:Note;
+					if (unspawnNotes.length > 0)
+						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
+					else
+						oldNote = null;
 
-				if (swagNote.mustPress)
-				{
-					swagNote.x += FlxG.width / 2; // general offset
+					if (daMineCheck) // you could probably even have opponent mines with this lol
+						daNoteData += 8;
+					var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+					swagNote.sustainLength = songNotes[2];
+					swagNote.scrollFactor.set(0, 0);
+
+					var susLength:Float = swagNote.sustainLength;
+
+					susLength = susLength / Conductor.stepCrochet;
+					unspawnNotes.push(swagNote);
+
+					for (susNote in 0...Math.floor(susLength))
+					{
+						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
+
+						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true);
+						sustainNote.scrollFactor.set();
+						unspawnNotes.push(sustainNote);
+
+						sustainNote.mustPress = gottaHitNote;
+
+						if (sustainNote.mustPress)
+						{
+							sustainNote.x += FlxG.width / 2; // general offset
+						}
+					}
+
+					swagNote.mustPress = gottaHitNote;
+
+					if (swagNote.mustPress)
+					{
+						swagNote.x += FlxG.width / 2; // general offset
+					}
+					else {}
 				}
-				else {}
 			}
 			daBeats += 1;
 		}
@@ -1961,8 +1976,14 @@ class PlayState extends MusicBeatState
 		var leftR = controls.LEFT_R;
 
 		var controlArray:Array<Bool> = [leftP, downP, upP, rightP, leftP, downP, upP, rightP, leftP, downP, upP, rightP];
-
+		var unbadControlArray:Array<Bool> = [leftP, downP, upP, rightP];
 		// FlxG.watch.addQuick('asdfa', upP);
+
+		/*for (keyP in unbadControlArray)
+			{
+				Thread.create();
+		}*/
+
 		if ((upP || rightP || downP || leftP) && !boyfriend.stunned && generatedMusic)
 		{
 			boyfriend.holdTimer = 0;

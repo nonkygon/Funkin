@@ -377,9 +377,11 @@ class TitleState extends MusicBeatState
 			// credTextShit.text = 'In association \nwith';
 			// credTextShit.screenCenter();
 			case 5:
-				createCoolText(['big boner']);
+				createCoolText(['stolen']);
 			case 7:
-				addMoreText('down the lane');
+				deleteCoolText();
+				createCoolText(['borrowed']);
+				addMoreText('from');
 				ngSpr.visible = true;
 			// credTextShit.text += '\nNewgrounds';
 			case 8:
@@ -424,7 +426,7 @@ class TitleState extends MusicBeatState
 		{
 			remove(ngSpr);
 
-			FlxG.camera.flash(FlxColor.RED, 4);
+			FlxG.camera.flash(FlxColor.BLUE, 4);
 			remove(credGroup);
 			skippedIntro = true;
 		}
